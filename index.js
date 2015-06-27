@@ -4,7 +4,7 @@ var express = require('express'),
   bunyan = require('bunyan');
 
 var repos = {
-  'git-node': '/home/adampoit/webapps/git_node/git_node'
+  'git-node': '/home/adampoit/webapps/git_node/git-node'
 };
 
 var logger = bunyan.createLogger({
