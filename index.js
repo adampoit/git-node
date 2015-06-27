@@ -12,12 +12,8 @@ var logger = bunyan.createLogger({
   streams: [
     {
       level: 'info',
-      path: '/home/adampoit/git_node_info.log'
+      path: '/home/adampoit/git_node.log'
     },
-    {
-      level: 'error',
-      path: '/home/adampoit/git_node_error.log'
-    }
   ]
 });
 
