@@ -36,7 +36,10 @@ app.post('/', function(request, response, next) {
     response.sendStatus(200);
 
     sh.cd('..');
-    sh.exec('./deploy.sh');
+    sh.exec('./deploy.sh', function (code, output) {
+      if (code !== 0)
+        logger.error(output);
+    });
   });
 });
 
