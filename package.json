@@ -1,0 +1,25 @@
+{
+  "name": "git-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adampoit/git-node.git"
+  },
+  "author": "Adam Poit",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adampoit/git-node/issues"
+  },
+  "homepage": "https://github.com/adampoit/git-node",
+  "dependencies": {
+    "body-parser": "^1.13.1",
+    "bunyan": "^1.4.0",
+    "express": "^4.13.0",
+    "shelljs": "^0.5.1"
+  }
+}
