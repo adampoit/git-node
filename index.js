@@ -4,7 +4,7 @@ var express = require('express'),
   bunyan = require('bunyan');
 
 var repos = {
-  'git-node': '/home/adampoit/webapps/git_node/git-node'
+  'git-node': '/home/adampoit/webapps/git_node/git_node'
 };
 
 var logger = bunyan.createLogger({
@@ -33,13 +33,10 @@ app.post('/', function(request, response, next) {
     if (code !== 0)
       return next(new Error(output));
 
-    sh.cd('..');
-    sh.exec('./deploy.sh', function (code, output) {
-      if (code !== 0)
-        return next(new Error(output));
+    response.sendStatus(200);
 
-      response.sendStatus(200);
-    });
+    sh.cd('..');
+    sh.exec('./deploy.sh');
   });
 });
 
