@@ -48,17 +48,18 @@ app.post('/', function (request, response, next) {
     logger.info('Deploying ' + repository.branch + ' branch');
 
     sh.cd(repository.path);
-    sh.exec('git checkout ' + repository.branch);
-    sh.exec('git pull', function (code, output) {
-      if (code !== 0)
-        return next(new Error(output));
-
-      response.sendStatus(200);
-
-      sh.cd('..');
-      sh.exec('./deploy.sh', function (code, output) {
+    sh.exec('git checkout ' + repository.branch, function (code, output) {
+      sh.exec('git pull', function (code, output) {
         if (code !== 0)
-          logger.error(output);
+          return next(new Error(output));
+
+        response.sendStatus(200);
+
+        sh.cd('..');
+        sh.exec('./deploy.sh', function (code, output) {
+          if (code !== 0)
+            logger.error(output);
+        });
       });
     });
   });
