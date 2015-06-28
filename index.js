@@ -48,7 +48,7 @@ app.post('/', function (request, response, next) {
     logger.info('Deploying ' + repository.branch + ' branch');
 
     sh.cd(repository.path);
-    sh.exec('git checkout ' + repository, { silent: true });
+    sh.exec('git checkout ' + repository.branch);
     sh.exec('git pull', function (code, output) {
       if (code !== 0)
         return next(new Error(output));
