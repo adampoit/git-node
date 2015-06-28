@@ -14,6 +14,10 @@ var repos = {
   ],
   'tranquil-web': [
     {
+      branch: 'master',
+      path: '/home/adampoit/webapps/tranquil_beta/tranquil-web'
+    },
+    {
       branch: 'production',
       path: '/home/adampoit/webapps/tranquil_production/tranquil-web'
     }
