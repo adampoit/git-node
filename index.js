@@ -1,8 +1,9 @@
 var express = require('express'),
   bodyParser = require('body-parser'),
-  sh = require('shelljs'),
   bunyan = require('bunyan'),
-  _ = require('underscore');
+  _ = require('underscore'),
+  exec = require('child_process').exec,
+  path = require('path');
 
 var repos = {
   'git-node': [
@@ -48,17 +49,20 @@ app.post('/', function (request, response, next) {
     logger.info('Deploying ' + repository.branch + ' branch');
 
     sh.cd(repository.path);
-    sh.exec('git checkout ' + repository.branch);
-    sh.exec('git pull', function (code, output) {
-      if (code !== 0)
-        return next(new Error(output));
+    exec('git checkout ' + repository.branch, { cwd: repository.path }, function (error, stdout, stderr) {
+      if (error !== null)
+        return next(error);
 
-      response.sendStatus(200);
+      exec('git pull', { cwd: repository.path }, function (error, stdout, stderr) {
+        if (error !== null)
+          return next(error);
 
-      sh.cd('..');
-      sh.exec('./deploy.sh', function (code, output) {
-        if (code !== 0)
-          logger.error(output);
+        response.sendStatus(200);
+
+        exec('./deploy.sh', { cwd: path.resolve(repository.path, '..' ) }, function (error, stdout, stderr) {
+          if (error !== null)
+            logger.error(error);
+        });
       });
     });
   });
