@@ -47,8 +47,6 @@ app.post('/', function (request, response, next) {
       return;
 
     logger.info('Deploying ' + repository.branch + ' branch');
-
-    sh.cd(repository.path);
     exec('git checkout ' + repository.branch, { cwd: repository.path }, function (error, stdout, stderr) {
       if (error !== null)
         return next(error);
