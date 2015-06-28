@@ -20,11 +20,11 @@ var logger = bunyan.createLogger({
 var app = express();
 app.use(bodyParser.json());
 
-var server = app.listen(28596, function() {
+var server = app.listen(28596, function () {
   logger.info('git-node started');
 });
 
-app.post('/', function(request, response, next) {
+app.post('/', function (request, response, next) {
   var repo = request.body.repository.name;
   logger.info('Deploying ' + repo);
 
