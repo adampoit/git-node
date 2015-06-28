@@ -1,11 +1,22 @@
 var express = require('express'),
   bodyParser = require('body-parser'),
   sh = require('shelljs'),
-  bunyan = require('bunyan');
+  bunyan = require('bunyan'),
+  _ = require('underscore');
 
 var repos = {
-  'git-node': '/home/adampoit/webapps/git_node/git-node',
-  'tranquil-web': '/home/adampoit/webapps/tranquil_production/tranquil-web'
+  'git-node': [
+    {
+      branch: 'master',
+      path: '/home/adampoit/webapps/git_node/git-node'
+    }
+  ],
+  'tranquil-web': [
+    {
+      branch: 'production',
+      path: '/home/adampoit/webapps/tranquil_production/tranquil-web'
+    }
+  ]
 };
 
 var logger = bunyan.createLogger({
@@ -26,20 +37,28 @@ var server = app.listen(28596, function () {
 });
 
 app.post('/', function (request, response, next) {
-  var repo = request.body.repository.name;
+  var payload = request.body;
+  var repo = payload.repository.name;
   logger.info('Deploying ' + repo);
 
-  sh.cd(repos[repo]);
-  sh.exec('git pull', function (code, output) {
-    if (code !== 0)
-      return next(new Error(output));
+  _.each(repos[repo], function (repository, index, list) {
+    if (payload.ref.indexOf(repository.branch) == -1)
+      return;
 
-    response.sendStatus(200);
+    logger.info('Deploying ' + repository.branch + ' branch');
 
-    sh.cd('..');
-    sh.exec('./deploy.sh', function (code, output) {
+    sh.cd(repository.path);
+    sh.exec('git pull', function (code, output) {
       if (code !== 0)
-        logger.error(output);
+        return next(new Error(output));
+
+      response.sendStatus(200);
+
+      sh.cd('..');
+      sh.exec('./deploy.sh', function (code, output) {
+        if (code !== 0)
+          logger.error(output);
+      });
     });
   });
 });
