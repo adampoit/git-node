@@ -35,8 +35,7 @@ app.post('/', function (request, response, next) {
     logger.info('Deploying ' + repository.branch + ' branch');
 
     var workspace = path.join(repository.path, repo);
-
-    exec('git checkout ' + branch, { cwd: workspace }, function (error, stdout, stderr) {
+    exec('git checkout ' + repository.branch, { cwd: workspace }, function (error, stdout, stderr) {
       if (error !== null)
         return next(error);
 
