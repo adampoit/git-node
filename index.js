@@ -35,36 +35,25 @@ app.post('/', function (request, response, next) {
     logger.info('Deploying ' + repository.branch + ' branch');
 
     var workspace = path.join(repository.path, repo);
-    checkout(repository.branch, workspace, function () {
-      response.sendStatus(200);
 
-      exec('gulp deploy', { cwd: workspace }, function (error, stdout, stderr) {
+    exec('git checkout ' + branch, { cwd: workspace }, function (error, stdout, stderr) {
+      if (error !== null)
+        return next(error);
+
+      exec('git pull', { cwd: workspace }, function (error, stdout, stderr) {
         if (error !== null)
-          logger.error(error);
+          return next(error);
+
+        response.sendStatus(200);
+
+        exec('gulp deploy', { cwd: workspace }, function (error, stdout, stderr) {
+          if (error !== null)
+            logger.error(error);
+        });
       });
     });
   });
 });
-
-function checkout(branch, workspace, next, callback) {
-  exec('git checkout ' + branch, { cwd: workspace }, function (error, stdout, stderr) {
-    if (error !== null)
-      return next(error);
-
-    pull(branch, workspace, callback);
-  });
-}
-
-function pull(branch, workspace, callback) {
-  exec('git pull', { cwd: workspace }, function (error, stdout, stderr) {
-    if (error !== null)
-      return next(error);
-
-    logger.info('Pulled changes');
-
-    callback();
-  });
-}
 
 app.use(function (error, request, response, next) {
   logger.error({ req: request, res: response, error: error }, error.stack);
