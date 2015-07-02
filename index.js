@@ -34,7 +34,7 @@ app.post('/', function (request, response, next) {
 
     logger.info('Deploying ' + repository.branch + ' branch');
 
-    var workspace = repository.path + repo;
+    var workspace = path.join(repository.path, repo);
     checkout(repository.branch, workspace, function () {
       response.sendStatus(200);
 
