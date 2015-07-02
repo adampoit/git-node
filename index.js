@@ -3,33 +3,15 @@ var express = require('express'),
   bunyan = require('bunyan'),
   _ = require('underscore'),
   exec = require('child_process').exec,
-  path = require('path');
-
-var repos = {
-  'git-node': [
-    {
-      branch: 'master',
-      path: '/home/adampoit/webapps/git_node/git-node'
-    }
-  ],
-  'tranquil-web': [
-    {
-      branch: 'master',
-      path: '/home/adampoit/webapps/tranquil_beta/tranquil-web'
-    },
-    {
-      branch: 'production',
-      path: '/home/adampoit/webapps/tranquil_production/tranquil-web'
-    }
-  ]
-};
+  path = require('path'),
+  config = require('../config');
 
 var logger = bunyan.createLogger({
   name: 'git-node',
   streams: [
     {
       level: 'info',
-      path: '/home/adampoit/git_node.log'
+      path: config.logfile
     },
   ]
 });
@@ -37,7 +19,7 @@ var logger = bunyan.createLogger({
 var app = express();
 app.use(bodyParser.json());
 
-var server = app.listen(28596, function () {
+var server = app.listen(config.port, function () {
   logger.info('git-node started');
 });
 
@@ -46,29 +28,41 @@ app.post('/', function (request, response, next) {
   var repo = payload.repository.name;
   logger.info('Deploying ' + repo);
 
-  _.each(repos[repo], function (repository, index, list) {
+  _.each(config.repos[repo], function (repository, index, list) {
     if (payload.ref.indexOf(repository.branch) == -1)
       return;
 
     logger.info('Deploying ' + repository.branch + ' branch');
-    exec('git checkout ' + repository.branch, { cwd: repository.path }, function (error, stdout, stderr) {
-      if (error !== null)
-        return next(error);
 
-      exec('git pull', { cwd: repository.path }, function (error, stdout, stderr) {
+    var workspace = repository.path + repo;
+    checkout(repository.branch, workspace, function () {
+      response.sendStatus(200);
+
+      exec('gulp deploy', { cwd: workspace }, function (error, stdout, stderr) {
         if (error !== null)
-          return next(error);
-
-        response.sendStatus(200);
-
-        exec('./deploy.sh', { cwd: path.resolve(repository.path, '..' ) }, function (error, stdout, stderr) {
-          if (error !== null)
-            logger.error(error);
-        });
+          logger.error(error);
       });
     });
   });
 });
+
+function checkout(branch, workspace, next, callback) {
+  exec('git checkout ' + branch, { cwd: workspace }, function (error, stdout, stderr) {
+    if (error !== null)
+      return next(error);
+
+    pull(branch, workspace, callback);
+  });
+}
+
+function pull(branch, workspace, callback) {
+  exec('git pull', { cwd: workspace }, function (error, stdout, stderr) {
+    if (error !== null)
+      return next(error);
+
+    callback();
+  });
+}
 
 app.use(function (error, request, response, next) {
   logger.error({ req: request, res: response, error: error }, error.stack);
