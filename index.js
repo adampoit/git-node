@@ -60,6 +60,8 @@ function pull(branch, workspace, callback) {
     if (error !== null)
       return next(error);
 
+    logger.info('Pulled changes');
+
     callback();
   });
 }
